@@ -1,0 +1,10 @@
+{
+  "_template": "gh:oncleben31/cookiecutter-homeassistant-custom-component",
+  "class_name_prefix": "EpsonProjectorLink",
+  "domain_name": "epson_projector_link",
+  "friendly_name": "Epson Projector Link",
+  "github_user": "amosyuen",
+  "project_name": "ha-epson-projector-link",
+  "test_suite": "yes",
+  "version": "0.0.0"
+}
