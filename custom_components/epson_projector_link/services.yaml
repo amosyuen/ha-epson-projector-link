@@ -1,0 +1,132 @@
+load_lens_memory:
+  name: Load Lens Memory
+  description: Load a previously saved lens memory on the Epson projector
+  target:
+    entity:
+      integration: epson_projector_link
+      domain: media_player
+  fields:
+    lens_memory_id:
+      name: Lens Memory ID
+      description: Lens Memory ID
+      required: true
+      example: 1
+      selector:
+        number:
+          min: 1
+          max: 10
+
+load_picture_memory:
+  name: Load Picture Memory
+  description: Load a previously saved picture memory on the Epson projector
+  target:
+    entity:
+      integration: epson_projector_link
+      domain: media_player
+  fields:
+    picture_memory_id:
+      name: Picture Memory ID
+      description: Picture Memory ID
+      required: true
+      example: 1
+      selector:
+        number:
+          min: 1
+          max: 10
+
+select_auto_iris_mode:
+  name: Select Auto Iris
+  description: Select auto iris mode of Epson projector
+  target:
+    entity:
+      integration: epson_projector_link
+      domain: media_player
+  fields:
+    auto_iris_mode:
+      name: Auto Iris
+      description: Auto Iris Mode
+      required: true
+      example: High
+      selector:
+        select:
+          options:
+            # Should keep in sync with epson_projector_link/projector/const.yaml AUTO_IRIS_MODE_CODE_MAP
+            - "Off"
+            - "Normal"
+            - "High"
+
+select_color_mode:
+  name: Select Color Mode
+  description: Select color mode of Epson projector
+  target:
+    entity:
+      integration: epson_projector_link
+      domain: media_player
+  fields:
+    color_mode:
+      name: Color Mode
+      description: Color Mode
+      required: true
+      example: cinema
+      selector:
+        select:
+          options:
+            # Should keep in sync with epson_projector_link/projector/const.yaml COLOR_MODE_CODE_MAP
+            - "3D Cinema"
+            - "3D Dynamic"
+            - "3D THX"
+            - "Adobe RGB"
+            - "Auto"
+            - "AutoColor"
+            - "B&W Cinema"
+            - "Bright Cinema"
+            - "Cinema"
+            - "Digital Cinema"
+            - "Dynamic"
+            - "Game"
+            - "Natural"
+            - "Stage"
+            - "THX"
+            - "Theatre Black 1/HD"
+            - "Theatre Black 2/Silver Screen"
+            - "Theatre"
+            - "x.v.Color"
+
+select_power_consumption_mode:
+  name: Select Power Consumption Mode
+  description: Select power consumption mode of Epson projector
+  target:
+    entity:
+      integration: epson_projector_link
+      domain: media_player
+  fields:
+    power_consumption_mode:
+      name: Power Consumption Mode
+      description: Power Consumption Mode
+      required: true
+      example: ECO
+      selector:
+        select:
+          options:
+            # Should keep in sync with epson_projector_link/projector/const.yaml POWER_CONSUMPTION_MODE_CODE_MAP
+            - "ECO"
+            - "Medium"
+            - "High"
+
+set_brightness:
+  name: Set Brightness
+  description: Set brightness of Epson projector
+  target:
+    entity:
+      integration: epson_projector_link
+      domain: media_player
+  fields:
+    brightness:
+      name: Brightness
+      description: Brightness
+      required: true
+      example: 128
+      selector:
+        number:
+          min: 0
+          max: 255
