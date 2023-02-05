@@ -1,4 +1,5 @@
 """The epson integration."""
+import asyncio
 import logging
 
 from homeassistant.components.media_player import (
@@ -27,7 +28,11 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
     projector = create_projector(config_entry.data)
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN][config_entry.entry_id] = projector
-    hass.config_entries.async_setup_platforms(config_entry, PLATFORMS)
+
+    for platform in PLATFORMS:
+        hass.async_add_job(
+            hass.config_entries.async_forward_entry_setup(config_entry, platform)
+        )
 
     config_entry.async_on_unload(config_entry.add_update_listener(update_listener))
 
@@ -54,9 +59,14 @@ async def update_listener(hass: HomeAssistant, config_entry: ConfigEntry) -> Non
 
 async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry):
     """Unload a config entry."""
-    unload_ok = await hass.config_entries.async_unload_platforms(
-        config_entry, PLATFORMS
+    unloaded = all(
+        await asyncio.gather(
+            *[
+                hass.config_entries.async_forward_entry_unload(config_entry, platform)
+                for platform in PLATFORMS
+            ]
+        )
     )
-    if unload_ok:
+    if unloaded:
         hass.data[DOMAIN].pop(config_entry.entry_id)
-    return unload_ok
+    return unloaded
