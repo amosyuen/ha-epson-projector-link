@@ -27,7 +27,11 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
     projector = create_projector(config_entry.data)
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN][config_entry.entry_id] = projector
-    hass.config_entries.async_setup_platforms(config_entry, PLATFORMS)
+
+    for platform in PLATFORMS:
+        hass.async_add_job(
+            hass.config_entries.async_forward_entry_setup(config_entry, platform)
+        )
 
     config_entry.async_on_unload(config_entry.add_update_listener(update_listener))
 
