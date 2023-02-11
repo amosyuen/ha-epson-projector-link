@@ -113,6 +113,22 @@ select_power_consumption_mode:
             - "Medium"
             - "High"
 
+send_command:
+  name: Send Command
+  description: Send ESC/VP21 Command
+  target:
+    entity:
+      integration: epson_projector_link
+      domain: media_player
+  fields:
+    command:
+      name: Command
+      description: ESC/VP21 Command
+      required: true
+      example: PWR ON
+      selector:
+        text:
+
 set_brightness:
   name: Set Brightness
   description: Set brightness of Epson projector

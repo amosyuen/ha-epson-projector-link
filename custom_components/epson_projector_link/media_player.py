@@ -31,6 +31,7 @@ from .const import SERVICE_LOAD_PICTURE_MEMORY
 from .const import SERVICE_SELECT_AUTO_IRIS_MODE
 from .const import SERVICE_SELECT_COLOR_MODE
 from .const import SERVICE_SELECT_POWER_CONSUMPTION_MODE
+from .const import SERVICE_SEND_COMMAND
 from .const import SERVICE_SET_BRIGHTNESS
 from .projector.const import AUTO_IRIS_MODE_CODE_INVERTED_MAP
 from .projector.const import COLOR_MODE_CODE_INVERTED_MAP
@@ -133,6 +134,11 @@ def _setup_services():
             )
         },
         SERVICE_SELECT_POWER_CONSUMPTION_MODE,
+    )
+    platform.async_register_entity_service(
+        SERVICE_SEND_COMMAND,
+        {vol.Required("command"): str},
+        SERVICE_SEND_COMMAND,
     )
     platform.async_register_entity_service(
         SERVICE_SET_BRIGHTNESS,
@@ -406,6 +412,9 @@ class EpsonProjectorMediaPlayer(MediaPlayerEntity):
 
     async def set_brightness(self, brightness):
         await self._projector.set_property(PROPERTY_BRIGHTNESS, brightness)
+
+    async def send_command(self, command):
+        await self._projector.send_command(command)
 
     def _callback(self, prop, value):
         if prop == PROPERTY_POWER:
