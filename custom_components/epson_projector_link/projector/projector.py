@@ -22,6 +22,8 @@ from .const import POWER_CONSUMPTION_MODE_CODE_MAP
 from .const import PROPERTY_AUTO_IRIS_MODE
 from .const import PROPERTY_BRIGHTNESS
 from .const import PROPERTY_COLOR_MODE
+from .const import PROPERTY_ERR
+from .const import PROPERTY_ERR_CODE_MAP
 from .const import PROPERTY_LAMP_HOURS
 from .const import PROPERTY_MUTE
 from .const import PROPERTY_POWER
@@ -69,6 +71,7 @@ POWER_PARSER = POWER_CODE_MAP.get
 PROPERTY_PARSER_MAP = {
     PROPERTY_AUTO_IRIS_MODE: AUTO_IRIS_MODE_CODE_MAP.get,
     PROPERTY_COLOR_MODE: COLOR_MODE_CODE_MAP.get,
+    PROPERTY_ERR: PROPERTY_ERR_CODE_MAP.get,
     PROPERTY_LAMP_HOURS: int,
     PROPERTY_BRIGHTNESS: int,
     PROPERTY_MUTE: lambda v: v == ON,
@@ -280,7 +283,7 @@ class Projector:
                 prop = response[0:key_value_separator_index]
                 value = response[key_value_separator_index + 1 :]
                 if prop == IMEVENT:
-                    self._handle_imevent(value)
+                    await self._handle_imevent(value)
                     continue
 
                 # Response from projector
@@ -319,10 +322,15 @@ class Projector:
         if request and not request.future.done():
             request.future.set_exception(ProjectorErrorResponse(error_message))
 
-    def _handle_imevent(self, value):
+    async def _handle_imevent(self, value):
         # Event from projector
         parts = value.split(" ")
         _LOGGER.debug('_handle_imevent: imevent value="%s"', value)
+
+        warning_bitmask = hex_string_to_int(parts[2])
+        for bit, warning in IMEVENT_WARNING_BIT_MAP.items():
+            if (warning_bitmask & (1 << bit)) > 0:
+                _LOGGER.warning('_handle_imevent: imevent warning="%s"', warning)
 
         power_code = hex_string_to_int(parts[1])
         if power_code == IMEVENT_STATUS_CODE_ABNORMAL:
@@ -333,7 +341,7 @@ class Projector:
             alarm_bitmask = hex_string_to_int(parts[3])
             for bit, alarm in IMEVENT_ALARM_BIT_MAP.items():
                 if (alarm_bitmask & (1 << bit)) > 0:
-                    _LOGGER.debug('_handle_imevent: imevent alarm="%s"', alarm)
+                    _LOGGER.error('_handle_imevent: imevent alarm="%s"', alarm)
         else:
             power = IMEVENT_STATUS_CODE_TO_POWER_MAP.get(power_code)
             if power is None:
@@ -342,11 +350,6 @@ class Projector:
                 )
             else:
                 self._update_property(PROPERTY_POWER, power)
-
-        warning_bitmask = hex_string_to_int(parts[2])
-        for bit, warning in IMEVENT_WARNING_BIT_MAP.items():
-            if (warning_bitmask & (1 << bit)) > 0:
-                _LOGGER.debug('_handle_imevent: imevent warning="%s"', warning)
 
     def _handle_property(self, prop, value):
         _LOGGER.debug('_handle_property: prop=%s value="%s"', prop, value)

@@ -48,6 +48,7 @@ STATUS_CODE_MAP = {
 PROPERTY_AUTO_IRIS_MODE = "IRIS"
 PROPERTY_BRIGHTNESS = "BRIGHT"
 PROPERTY_COLOR_MODE = "CMODE"
+PROPERTY_ERR = "ERR"
 PROPERTY_LAMP_HOURS = "LAMP"
 PROPERTY_MUTE = "MUTE"
 PROPERTY_POWER = "PWR"
@@ -112,6 +113,34 @@ COLOR_MODE_CODE_MAP = {
     "C1": "AutoColor",
 }
 COLOR_MODE_CODE_INVERTED_MAP = invert_map(COLOR_MODE_CODE_MAP)
+
+#
+# Errors
+#
+ERROR_NONE = "None"
+PROPERTY_ERR_CODE_MAP = {
+    "00": ERROR_NONE,
+    "01": "Fan error",
+    "03": "Lamp failure at power on",
+    "04": "High internal temperature error",
+    "06": "Lamp error",
+    "07": "Open Lamp cover door error",
+    "08": "Cinema filter error",
+    "09": "Electric dual-layered capacitor is disconnected",
+    "0A": "Auto iris error",
+    "0B": "Subsystem Error",
+    "0C": "Low air flow error",
+    "0D": "Air filter air flow sensor error",
+    "0E": "Power supply unit error (Ballast)",
+    "0F": "Shutter error",
+    "10": "Cooling system error (peltiert element)",
+    "11": "Cooling system error (Pump)",
+    "12": "Static iris error",
+    "13": "Power supply unit error (Disagreement of Ballast)",
+    "14": "Exhaust shutter error",
+    "15": "Obstacle detection error",
+    "16": "IF board discernment error",
+}
 
 #
 # Power

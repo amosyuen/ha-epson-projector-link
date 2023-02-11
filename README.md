@@ -30,9 +30,12 @@ This custom component is designed for Epson Home Cinema Projectors which support
 - Get and set color mode
 - Get filter hours
 - Get lamp hours
+- Get current error
 - Increase or decrease volume
 - Play, pause, or stop media
 - Next or previous media
+
+All the get features will be exposed as attributes on the `media_player`. Changes are exposed as services. See service documentation at https://github.com/amosyuen/ha-epson-projector-link/blob/main/custom_components/epson_projector_link/services.yaml
 
 ### Differences from HA Epson Integration
 
