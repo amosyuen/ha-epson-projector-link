@@ -1,12 +1,12 @@
 {
   "domain": "epson_projector_link",
   "name": "Epson Projector Link",
-  "documentation": "https://github.com/amosyuen/ha-epson-projector-link",
-  "issue_tracker": "https://github.com/amosyuen/ha-epson-projector-link/issues",
-  "dependencies": [],
-  "config_flow": true,
   "codeowners": ["@amosyuen"],
-  "requirements": ["pyserial_asyncio>=0.4", "async_timeout>=3.0.0"],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://github.com/amosyuen/ha-epson-projector-link",
   "iot_class": "local_push",
+  "issue_tracker": "https://github.com/amosyuen/ha-epson-projector-link/issues",
+  "requirements": ["pyserial_asyncio>=0.4", "async_timeout>=3.0.0"],
   "version": "0.0.0"
 }
