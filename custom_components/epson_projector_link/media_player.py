@@ -229,6 +229,7 @@ class EpsonProjectorMediaPlayer(MediaPlayerEntity):
         self._attr_source_list = None
         self._attr_state = None
         self._attr_supported_features = _get_supported_features(poll_properties)
+        self._attr_translation_key = "projector"
 
         projector.set_callback(self._callback)
 

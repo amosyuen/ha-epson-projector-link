@@ -1,10 +1,14 @@
 {
-  "state": {
+  "entity": {
     "media_player": {
-      "cooldown": "Cooldown",
-      "on": "[%key:common::state::on%]",
-      "off": "[%key:common::state::off%]",
-      "warmup": "Warmup"
+      "projector": {
+        "state": {
+          "cooldown": "Cooldown",
+          "on": "On",
+          "off": "Off",
+          "warmup": "Warmup"
+        }
+      }
     }
   },
   "config": {
