@@ -8,10 +8,7 @@ import voluptuous as vol
 from homeassistant.components.media_player import DEVICE_CLASS_TV
 from homeassistant.components.media_player import DOMAIN as MEDIA_PLAYER_PLATFORM
 from homeassistant.components.media_player import MediaPlayerEntity
-from homeassistant.components.media_player.const import SUPPORT_SELECT_SOURCE
-from homeassistant.components.media_player.const import SUPPORT_TURN_OFF
-from homeassistant.components.media_player.const import SUPPORT_TURN_ON
-from homeassistant.components.media_player.const import SUPPORT_VOLUME_SET
+from homeassistant.components.media_player.const import MediaPlayerEntityFeature
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_SCAN_INTERVAL
 from homeassistant.const import STATE_ON
@@ -173,23 +170,23 @@ async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry):
 
 
 PROPERTY_TO_FEATURE_MAP = {
-    PROPERTY_SOURCE: SUPPORT_SELECT_SOURCE,
-    PROPERTY_VOLUME: SUPPORT_VOLUME_SET,
+    PROPERTY_SOURCE: MediaPlayerEntityFeature.SELECT_SOURCE,
+    PROPERTY_VOLUME: MediaPlayerEntityFeature.VOLUME_SET,
 }
 
 
 def _get_supported_features(properties):
     features = (
-        SUPPORT_TURN_OFF
-        | SUPPORT_TURN_ON
+        MediaPlayerEntityFeature.TURN_OFF
+        | MediaPlayerEntityFeature.TURN_ON
         # Technically supported, but disabled since it just proxies to the playing device
-        # | SUPPORT_PAUSE
-        # | SUPPORT_PLAY
-        # | SUPPORT_STOP
-        # | SUPPORT_NEXT_TRACK
-        # | SUPPORT_PREVIOUS_TRACK
-        # | SUPPORT_VOLUME_MUTE
-        # | SUPPORT_VOLUME_STEP  # Some projectors can step volume even if they can't read volume
+        # | MediaPlayerEntityFeature.PAUSE
+        # | MediaPlayerEntityFeature.PLAY
+        # | MediaPlayerEntityFeature.STOP
+        # | MediaPlayerEntityFeature.NEXT_TRACK
+        # | MediaPlayerEntityFeature.PREVIOUS_TRACK
+        # | MediaPlayerEntityFeature.VOLUME_MUTE
+        # | MediaPlayerEntityFeature.VOLUME_STEP  # Some projectors can step volume even if they can't read volume
     )
 
     for prop in properties:
