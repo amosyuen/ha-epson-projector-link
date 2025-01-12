@@ -4,8 +4,8 @@ import asyncio
 from datetime import timedelta
 import logging
 
-from homeassistant.components.media_player import DEVICE_CLASS_TV
 from homeassistant.components.media_player import DOMAIN as MEDIA_PLAYER_PLATFORM
+from homeassistant.components.media_player import MediaPlayerDeviceClass
 from homeassistant.components.media_player import MediaPlayerEntity
 from homeassistant.components.media_player.const import MediaPlayerEntityFeature
 from homeassistant.config_entries import ConfigEntry
@@ -221,7 +221,7 @@ class EpsonProjectorMediaPlayer(MediaPlayerEntity):
         self._poll_properties = poll_properties
 
         self._attr_available = False
-        self._attr_device_class = DEVICE_CLASS_TV
+        self._attr_device_class = MediaPlayerDeviceClass.TV
         self._attr_extra_state_attributes = {}
         self._attr_should_poll = False  # We do our own polling based on config setting
         self._attr_source_list = None
