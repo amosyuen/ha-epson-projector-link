@@ -339,7 +339,7 @@ class EpsonProjectorMediaPlayer(MediaPlayerEntity):
         await self._projector.set_property(PROPERTY_POWER, OFF)
 
     async def async_select_source(self, source):
-        source_code = SOURCE_CODE_INVERTED_MAP[source]
+        source_code = SOURCE_CODE_INVERTED_MAP.get(source)
         if source_code is None:
             source_code = source
         await self._projector.set_property(PROPERTY_SOURCE, source_code)

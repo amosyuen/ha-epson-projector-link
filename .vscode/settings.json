@@ -1,12 +1,18 @@
 {
-  "python.linting.pylintArgs": ["--rcfile=setup.cfg"],
-  "python.linting.pylintEnabled": true,
-  "python.linting.enabled": true,
-  "python.pythonPath": "venv/bin/python",
-  "files.associations": {
-    "*.yaml": "home-assistant"
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": "explicit"
   },
+  "editor.formatOnSave": true,
+  "editor.tabSize": 4,
+  "files.eol": "\n",
+  "files.trimTrailingWhitespace": true,
   "[javascript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.black-formatter"
+  },
+  "files.associations": {
+    "*.yaml": "home-assistant"
   }
 }
