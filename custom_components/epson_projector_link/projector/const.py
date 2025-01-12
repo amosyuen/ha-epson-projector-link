@@ -141,6 +141,14 @@ PROPERTY_ERR_CODE_MAP = {
     "14": "Exhaust shutter error",
     "15": "Obstacle detection error",
     "16": "IF board discernment error",
+    "17": "Communication error of stack projection function",
+    "18": "I2C error",
+    "1A": "Lens shift error",
+    "1B": "Quarts N Polarizer error",
+    "1C": "No lens error",
+    "1D": "Subsystem error 2",
+    "1E": "Power supply voltage error",
+    "1F": "Other error",
 }
 
 #
