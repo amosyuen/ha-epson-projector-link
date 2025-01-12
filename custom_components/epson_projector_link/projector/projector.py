@@ -1,15 +1,16 @@
 """TCP connection of Epson projector module."""
+
 import asyncio
-import logging
 from collections import deque
+import logging
 
 import async_timeout
 from homeassistant.const import STATE_UNKNOWN
 
 from .const import AUTO_IRIS_MODE_CODE_MAP
 from .const import COLOR_MODE_CODE_MAP
-from .const import ESCVPNET_CONNECT_COMMAND
 from .const import ESCVPNETNAME
+from .const import ESCVPNET_CONNECT_COMMAND
 from .const import IMEVENT
 from .const import IMEVENT_ALARM_BIT_MAP
 from .const import IMEVENT_STATUS_CODE_ABNORMAL

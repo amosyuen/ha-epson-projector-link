@@ -1,4 +1,5 @@
 """Const helpers of Epson projector module."""
+
 from homeassistant.const import STATE_OFF
 from homeassistant.const import STATE_ON
 

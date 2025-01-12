@@ -1,10 +1,9 @@
 """Support for Epson projector."""
-import asyncio
-import logging
-from datetime import timedelta
 
-import homeassistant.helpers.config_validation as cv
-import voluptuous as vol
+import asyncio
+from datetime import timedelta
+import logging
+
 from homeassistant.components.media_player import DEVICE_CLASS_TV
 from homeassistant.components.media_player import DOMAIN as MEDIA_PLAYER_PLATFORM
 from homeassistant.components.media_player import MediaPlayerEntity
@@ -14,9 +13,11 @@ from homeassistant.const import CONF_SCAN_INTERVAL
 from homeassistant.const import STATE_ON
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import entity_platform
+import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.entity_registry import async_get as async_get_entity_registry
 from homeassistant.helpers.event import async_call_later
 from homeassistant.helpers.event import async_track_time_interval
+import voluptuous as vol
 
 from .const import CONF_POLL_PROPERTIES
 from .const import CONF_PROPERTIES_SCAN_INTERVAL

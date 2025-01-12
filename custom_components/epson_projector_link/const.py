@@ -1,4 +1,5 @@
 """Constants for the epson integration."""
+
 from datetime import timedelta
 
 from .projector.const import PROPERTY_AUTO_IRIS_MODE

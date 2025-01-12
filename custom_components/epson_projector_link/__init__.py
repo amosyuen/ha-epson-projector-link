@@ -1,10 +1,9 @@
 """The epson integration."""
+
 import asyncio
 import logging
 
-from homeassistant.components.media_player import (
-    DOMAIN as MEDIA_PLAYER_PLATFORM,
-)
+from homeassistant.components.media_player import DOMAIN as MEDIA_PLAYER_PLATFORM
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST
 from homeassistant.core import HomeAssistant
