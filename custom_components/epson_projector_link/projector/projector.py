@@ -53,6 +53,11 @@ def hex_string_to_int(string):
     return int(string, 16)
 
 
+def _get_source_name(code):
+    source_name = SOURCE_CODE_MAP.get(code)
+    return code if source_name is None else source_name
+
+
 def _parse_source_list(response):
     parts = response.split(" ")
     if len(parts) % 2 == 1:
@@ -62,9 +67,9 @@ def _parse_source_list(response):
         )
     sources = []
     for i in range(len(parts) // 2):
-        source_name = SOURCE_CODE_MAP.get(parts[2 * i])
-        if source_name is not None:
-            sources.append(source_name)
+        code = parts[2 * i]
+        source_name = SOURCE_CODE_MAP.get(code)
+        sources.append(code if source_name is None else source_name)
     return sources
 
 
@@ -78,7 +83,7 @@ PROPERTY_PARSER_MAP = {
     PROPERTY_MUTE: lambda v: v == ON,
     PROPERTY_POWER: POWER_PARSER,
     PROPERTY_POWER_CONSUMPTION_MODE: POWER_CONSUMPTION_MODE_CODE_MAP.get,
-    PROPERTY_SOURCE: SOURCE_CODE_MAP.get,
+    PROPERTY_SOURCE: _get_source_name,
     PROPERTY_SOURCE_LIST: _parse_source_list,
     PROPERTY_VOLUME: int,
 }

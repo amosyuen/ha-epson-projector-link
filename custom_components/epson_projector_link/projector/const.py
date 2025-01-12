@@ -175,12 +175,14 @@ POWER_CONSUMPTION_MODE_CODE_INVERTED_MAP = invert_map(POWER_CONSUMPTION_MODE_COD
 #
 SOURCE_CODE_MAP = {
     "10": "PC",
+    "20": "PC2",
     "30": "HDMI1",
     "40": "VIDEO",
     "52": "USB",
     "53": "LAN",
     "56": "WiFi Direct",
     "A0": "HDMI2",
+    "D0": "WirelessHD",
 }
 SOURCE_CODE_INVERTED_MAP = invert_map(SOURCE_CODE_MAP)
 

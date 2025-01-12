@@ -339,8 +339,10 @@ class EpsonProjectorMediaPlayer(MediaPlayerEntity):
         await self._projector.set_property(PROPERTY_POWER, OFF)
 
     async def async_select_source(self, source):
-        selected_source = SOURCE_CODE_INVERTED_MAP[source]
-        await self._projector.set_property(PROPERTY_SOURCE, selected_source)
+        source_code = SOURCE_CODE_INVERTED_MAP[source]
+        if source_code is None:
+            source_code = source
+        await self._projector.set_property(PROPERTY_SOURCE, source_code)
 
     async def async_set_volume_level(self, volume):
         await self._projector.set_property(PROPERTY_VOLUME, int(volume * 100))
