@@ -7,6 +7,7 @@ import logging
 from homeassistant.components.media_player import DOMAIN as MEDIA_PLAYER_PLATFORM
 from homeassistant.components.media_player import MediaPlayerDeviceClass
 from homeassistant.components.media_player import MediaPlayerEntity
+from homeassistant.components.media_player.const import ATTR_INPUT_SOURCE_LIST
 from homeassistant.components.media_player.const import MediaPlayerEntityFeature
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_SCAN_INTERVAL
@@ -17,6 +18,7 @@ import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.entity_registry import async_get as async_get_entity_registry
 from homeassistant.helpers.event import async_call_later
 from homeassistant.helpers.event import async_track_time_interval
+from homeassistant.helpers.restore_state import RestoreEntity
 import voluptuous as vol
 
 from .const import CONF_POLL_PROPERTIES
@@ -206,7 +208,7 @@ def _to_hex(integer):
     return "%0.2X" % integer
 
 
-class EpsonProjectorMediaPlayer(MediaPlayerEntity):
+class EpsonProjectorMediaPlayer(MediaPlayerEntity, RestoreEntity):
     """Representation of Epson Projector Home Cinema Device."""
 
     def __init__(
@@ -269,6 +271,21 @@ class EpsonProjectorMediaPlayer(MediaPlayerEntity):
             )
         self._unregister_callbacks = unregister_callbacks
 
+    async def async_added_to_hass(self):
+        """Run when entity about to be added."""
+        await super().async_added_to_hass()
+
+        # Restore old state
+        old_state = await self.async_get_last_state()
+        if old_state is not None:
+            self._attr_source_list = old_state.attributes.get(ATTR_INPUT_SOURCE_LIST)
+
+            for attribute in PROPERTY_TO_ATTRIBUTE_NAME_MAP.values():
+                value = old_state.attributes.get(attribute)
+                if value is not None:
+                    self._attr_extra_state_attributes[attribute] = value
+            self.async_write_ha_state()
+
     def unload(self):
         """Unload projector entity."""
         for callback in self._unregister_callbacks:
@@ -297,7 +314,7 @@ class EpsonProjectorMediaPlayer(MediaPlayerEntity):
     # now param is to allow callback to work
     def update_additional_attributes(self, now=None):
         """Poll additional attributes"""
-        if PROPERTY_SOURCE in self._poll_properties:
+        if PROPERTY_SOURCE in self._poll_properties and self._attr_source_list is None:
             self.hass.create_task(self.async_try_get_property(PROPERTY_SOURCE_LIST))
 
         if self._attr_state == STATE_ON:
