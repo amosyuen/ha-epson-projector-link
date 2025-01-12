@@ -133,9 +133,9 @@ class Projector:
             raise
 
         _LOGGER.debug(
-            'connect: response="%s" response_bytes_hex=%s len=%d',
-            response.decode(),
-            "".join("{:02x}".format(b) for b in response),
+            "connect: response=%s bytes=%s len=%d",
+            response.decode().encode("unicode_escape"),
+            response,
             len(response),
         )
         if len(response) < 16 or response[0:10].decode() != ESCVPNETNAME:
@@ -263,10 +263,8 @@ class Projector:
 
             response = response_bytes.decode()
             _LOGGER.debug(
-                '_listen: response="%s" response_bytes_hex=%s len=%d',
-                response,
-                "".join("{:02x}".format(b) for b in response_bytes),
-                len(response),
+                "_listen: response=%s bytes=%s len=%d",
+                response.encode("unicode_escape"),
             )
 
             # Always ends with colon, strip it off
