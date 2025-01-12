@@ -58,6 +58,8 @@ As of September 2022, the main differences with the built in [Home Assistant Eps
 
 - Only supports TCP sockets. The HA Epson integration uses HTTP. Developer has mentioned that not all projectors support TCP.
 
+{% if not installed %}
+
 ## Installation
 
 ### HACS
