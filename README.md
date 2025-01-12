@@ -85,8 +85,6 @@ As of September 2022, the main differences with the built in [Home Assistant Eps
 9. Click "+ Add Integration"
 10. Search for "Epson Projector Link"
 
-{% endif %}
-
 ## Configuration
 
 Config is done in the HA integrations UI.
