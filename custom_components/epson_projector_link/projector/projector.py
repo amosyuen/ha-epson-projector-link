@@ -1,6 +1,7 @@
 """TCP connection of Epson projector module."""
 
 import asyncio
+import binascii
 from collections import deque
 import logging
 
@@ -136,7 +137,7 @@ class Projector:
         _LOGGER.debug(
             "connect: response=%s bytes=%s len=%d",
             response.decode().encode("unicode_escape"),
-            response,
+            binascii.hexlify(response),
             len(response),
         )
         if len(response) < 16 or response[0:10].decode() != ESCVPNETNAME:
@@ -150,7 +151,7 @@ class Projector:
         status = STATUS_CODE_MAP.get(status_code, status_code)
         header_count = response[15]
         _LOGGER.debug(
-            "connect: status=%d, header_count=%d",
+            "connect: status=%s, header_count=%d",
             status,
             header_count,
         )
@@ -280,6 +281,8 @@ class Projector:
             _LOGGER.debug(
                 "_listen: response=%s bytes=%s len=%d",
                 response.encode("unicode_escape"),
+                binascii.hexlify(response_bytes),
+                len(response),
             )
 
             # Always ends with colon, strip it off
