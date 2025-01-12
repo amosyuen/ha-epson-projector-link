@@ -19,6 +19,7 @@
       "property_error_auto_iris_mode": "Property \"Auto Iris Mode\" is not supported or projector is off.",
       "property_error_brightness": "Property \"Brightness\" is not supported or projector is off.",
       "property_error_color_mode": "Property \"Color Mode\" is not supported or projector is off.",
+      "property_error_error": "Property \"Error\" is not supported or projector is off.",
       "property_error_lamp_hours": "Property \"Lamp Hours\" is not supported or projector is off.",
       "property_error_is_volume_muted": "Property \"Is Volume Muted\" is not supported or projector is off.",
       "property_error_power_consumption_mode": "Property \"Power Consumption Mode\" is not supported or projector is off.",
