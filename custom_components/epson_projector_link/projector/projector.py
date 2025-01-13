@@ -216,20 +216,34 @@ class Projector:
 
         # Wait if the projector is cooling down or warming up
         if self._power_state == STATE_COOLDOWN or self._power_state == STATE_WARMUP:
-            if self._power_on_off_future is None or self._power_on_off_future.done():
-                self._power_on_off_future = asyncio.Future()
-            try:
-                _LOGGER.debug(
-                    '_send_request: command="%s" waiting for power state change future',
-                    request.command,
-                )
-                with async_timeout.timeout(TIMEOUT_POWER_ON_OFF):
-                    await self._power_on_off_future
-            except Exception:
-                pass
+            if not self._power_on_off_future.done():
+                try:
+                    _LOGGER.debug(
+                        '_send_request: command="%s" waiting for power state change future',
+                        request.command,
+                    )
+                    with async_timeout.timeout(TIMEOUT_POWER_ON_OFF):
+                        await self._power_on_off_future
+                except asyncio.TimeoutError as err:
+                    if (
+                        self._power_on_off_future is not None
+                        and not self._power_on_off_future.done()
+                    ):
+                        self._power_on_off_future.set_exception(err)
+                except Exception:
+                    pass
 
         try:
-            with async_timeout.timeout(TIMEOUT_REQUEST):
+            is_power_request = request.command.startswith(PROPERTY_POWER + " ")
+            if is_power_request:
+                self._power_on_off_future = request.future
+            _LOGGER.debug(
+                '_send_request: command="%s" sending request',
+                request.command,
+            )
+            with async_timeout.timeout(
+                TIMEOUT_POWER_ON_OFF if is_power_request else TIMEOUT_REQUEST
+            ):
                 self._writer.write(f"{request.command}\r".encode())
                 return await request.future
         except asyncio.TimeoutError as err:
@@ -311,8 +325,18 @@ class Projector:
         if request:
             # Set state to warmup / cooldown so we will delay requests until power state changes
             if (self._power_state == STATE_OFF) and command == f"{PROPERTY_POWER} {ON}":
+                if self._power_on_off_future is None:
+                    _LOGGER.debug(
+                        "_update_property: Creating _power_on_off_future for warmup"
+                    )
+                    self._power_on_off_future = asyncio.Future()
                 self._update_property(PROPERTY_POWER, STATE_WARMUP)
             elif self._power_state == STATE_ON and command == f"{PROPERTY_POWER} {OFF}":
+                if self._power_on_off_future is None:
+                    _LOGGER.debug(
+                        "_update_property: Creating _power_on_off_future for cooldown"
+                    )
+                    self._power_on_off_future = asyncio.Future()
                 self._update_property(PROPERTY_POWER, STATE_COOLDOWN)
 
             if not request.future.done():
@@ -394,13 +418,14 @@ class Projector:
                 return
 
             self._power_state = value
-            if (
-                (value == STATE_OFF or value == STATE_ON)
-                and self._power_on_off_future is not None
-                and not self._power_on_off_future.done()
-            ):
-                _LOGGER.debug("_update_property: Resolving _power_on_off_future")
-                self._power_on_off_future.set_result(value)
+            if value == STATE_OFF or value == STATE_ON:
+                if (
+                    self._power_on_off_future is not None
+                    and not self._power_on_off_future.done()
+                ):
+                    _LOGGER.debug("_update_property: Resolving _power_on_off_future")
+                    self._power_on_off_future.set_result(value)
+                self._power_on_off_future = None
         if self._callback:
             asyncio.create_task(self._create_callback_task(self._callback, prop, value))
 
