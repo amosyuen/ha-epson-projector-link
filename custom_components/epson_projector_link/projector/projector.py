@@ -359,13 +359,22 @@ class Projector:
         parts = value.split(" ")
         _LOGGER.debug('_handle_imevent: imevent value="%s"', value)
 
-        warning_bitmask = hex_string_to_int(parts[2])
-        for bit, warning in IMEVENT_WARNING_BIT_MAP.items():
-            if (warning_bitmask & (1 << bit)) > 0:
-                _LOGGER.warning('_handle_imevent: imevent warning="%s"', warning)
+        if len(parts) < 2:
+            _LOGGER.warning("_handle_imevent: Value unexpectedly only has 2 parts.")
+
+        if len(parts) >= 3:
+            warning_bitmask = hex_string_to_int(parts[2])
+            for bit, warning in IMEVENT_WARNING_BIT_MAP.items():
+                if (warning_bitmask & (1 << bit)) > 0:
+                    _LOGGER.warning('_handle_imevent: imevent warning="%s"', warning)
 
         power_code = hex_string_to_int(parts[1])
         if power_code == IMEVENT_STATUS_CODE_ABNORMAL:
+            if len(parts) < 4:
+                _LOGGER.warning(
+                    "_handle_imevent: Value unexpectedly has less than 4 parts."
+                )
+                return
             _LOGGER.error(
                 "_handle_imevent: imevent abnormal power code. Alarm Bitmask=%s",
                 parts[3],
