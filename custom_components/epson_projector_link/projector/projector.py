@@ -204,6 +204,14 @@ class Projector:
         if self._is_open is False:
             await self.connect()
 
+        for r in self._request_queue:
+            if r.command == request.command:
+                _LOGGER.debug(
+                    '_send_request: command="%s" waiting on previous duplicate command',
+                    request.command,
+                )
+                return await r.future
+
         self._request_queue.append(request)
 
         if len(self._request_queue) > 1:
