@@ -3,6 +3,7 @@
 import asyncio
 import binascii
 from collections import deque
+import inspect
 import logging
 
 import async_timeout
@@ -109,6 +110,7 @@ class Projector:
         self._power_state = None
         self._power_on_off_future = None
         self._request_queue = deque()
+        self._tasks = set()
 
         self._reader = None
         self._writer = None
@@ -161,7 +163,7 @@ class Projector:
         self._is_open = True
         self._reader = reader
         self._writer = writer
-        asyncio.create_task(self._listen())
+        self._create_task(self._listen())
         _LOGGER.info("connect: Connection opened")
         return
 
@@ -320,7 +322,7 @@ class Projector:
         # Explicit close will set _is_open to False.
         if self._is_open:
             self._is_open = False
-            asyncio.create_task(self.connect())
+            self._create_task(self.connect())
 
     def _handle_ack(self):
         request = self._pop_request()
@@ -448,10 +450,18 @@ class Projector:
                     self._has_errors = False
                     self._update_property(PROPERTY_ERR, None)
         if self._callback:
-            asyncio.create_task(self._create_callback_task(self._callback, prop, value))
+            self._create_task(self._create_callback_task(self._callback, prop, value))
 
+    # Callback may not be async, so should wrap it in async function
     async def _create_callback_task(self, callback, prop, value):
-        callback(prop, value)
+        value = callback(prop, value)
+        if inspect.iscoroutine(value):
+            await value
+
+    def _create_task(self, coro):
+        task = asyncio.create_task(coro)
+        self._tasks.add(task)
+        task.add_done_callback(self._tasks.discard)
 
     def _pop_request(self):
         if len(self._request_queue) > 0:
