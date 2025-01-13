@@ -294,7 +294,7 @@ class EpsonProjectorMediaPlayer(MediaPlayerEntity, RestoreEntity):
             return self._attr_state
         except asyncio.TimeoutError:
             async_call_later(
-                self.hass, POWER_TIMEOUT_RETRY_INTERVAL, self.async_get_power
+                self.hass, POWER_TIMEOUT_RETRY_INTERVAL, self._async_get_power_callback
             )
         except Exception as err:
             _LOGGER.debug("async_get_power: Error getting power error=%s", err)
