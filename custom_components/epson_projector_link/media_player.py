@@ -258,7 +258,6 @@ class EpsonProjectorMediaPlayer(MediaPlayerEntity, RestoreEntity):
         if scan_interval_properties is not None and len(poll_properties) > 0:
 
             def update_attributes(now):
-                _LOGGER.debug("update_attributes:")
                 return self.update_additional_attributes()
 
             unregister_callbacks.append(

@@ -237,6 +237,10 @@ class Projector:
                     with async_timeout.timeout(TIMEOUT_POWER_ON_OFF):
                         await self._power_on_off_future
                 except asyncio.TimeoutError as err:
+                    _LOGGER.warning(
+                        '_send_request: command="%s" timeout waiting for _power_on_off_future',
+                        request.command,
+                    )
                     if (
                         self._power_on_off_future is not None
                         and not self._power_on_off_future.done()
@@ -258,10 +262,6 @@ class Projector:
             ):
                 self._writer.write(f"{request.command}\r".encode())
                 return await request.future
-        except asyncio.TimeoutError as err:
-            if not request.future.done():
-                request.future.set_exception(err)
-            raise
         except Exception as err:
             _LOGGER.exception(
                 '_send_request: command="%s" error=%s',
