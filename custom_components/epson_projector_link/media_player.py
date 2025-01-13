@@ -31,6 +31,7 @@ from .const import SERVICE_SELECT_COLOR_MODE
 from .const import SERVICE_SELECT_POWER_CONSUMPTION_MODE
 from .const import SERVICE_SEND_COMMAND
 from .const import SERVICE_SET_BRIGHTNESS
+from .const import STATE_ERROR
 from .projector.const import AUTO_IRIS_MODE_CODE_INVERTED_MAP
 from .projector.const import COLOR_MODE_CODE_INVERTED_MAP
 from .projector.const import COMMAND_LOAD_LENS_MEMORY
@@ -49,6 +50,7 @@ from .projector.const import POWER_CONSUMPTION_MODE_CODE_INVERTED_MAP
 from .projector.const import PROPERTY_AUTO_IRIS_MODE
 from .projector.const import PROPERTY_BRIGHTNESS
 from .projector.const import PROPERTY_COLOR_MODE
+from .projector.const import PROPERTY_ERR
 from .projector.const import PROPERTY_MUTE
 from .projector.const import PROPERTY_POWER
 from .projector.const import PROPERTY_POWER_CONSUMPTION_MODE
@@ -56,6 +58,8 @@ from .projector.const import PROPERTY_SOURCE
 from .projector.const import PROPERTY_SOURCE_LIST
 from .projector.const import PROPERTY_VOLUME
 from .projector.const import SOURCE_CODE_INVERTED_MAP
+from .projector.const import STATE_COOLDOWN
+from .projector.const import STATE_WARMUP
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -222,7 +226,9 @@ class EpsonProjectorMediaPlayer(MediaPlayerEntity):
 
         self._attr_available = False
         self._attr_device_class = MediaPlayerDeviceClass.TV
-        self._attr_extra_state_attributes = {}
+        self._attr_extra_state_attributes = {
+            PROPERTY_TO_ATTRIBUTE_NAME_MAP[PROPERTY_ERR]: None
+        }
         self._attr_should_poll = False  # We do our own polling based on config setting
         self._attr_source_list = None
         self._attr_state = None
@@ -441,6 +447,10 @@ class EpsonProjectorMediaPlayer(MediaPlayerEntity):
             value,
         )
         self._attr_extra_state_attributes[attribute_name] = value
+        if prop == PROPERTY_ERR and (
+            self._attr_state is STATE_WARMUP or self._attr_state is STATE_COOLDOWN
+        ):
+            self._attr_state = STATE_ERROR
         self._update_ha()
 
     def _update_power(self, value):

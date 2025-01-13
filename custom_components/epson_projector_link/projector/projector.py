@@ -102,6 +102,7 @@ class Projector:
         self._host = host
         self._port = port
         self._is_open = False
+        self._has_errors = False
         self._serial = None
         self._callback = None
         self._power_state = None
@@ -367,9 +368,14 @@ class Projector:
                 parts[3],
             )
             alarm_bitmask = hex_string_to_int(parts[3])
+            errors = []
             for bit, alarm in IMEVENT_ALARM_BIT_MAP.items():
                 if (alarm_bitmask & (1 << bit)) > 0:
                     _LOGGER.error('_handle_imevent: imevent alarm="%s"', alarm)
+                    errors.append(alarm)
+            if len(errors) > 0:
+                self._has_errors = True
+                self._update_property(PROPERTY_ERR, ", ".join(errors))
         else:
             power = IMEVENT_STATUS_CODE_TO_POWER_MAP.get(power_code)
             if power is None:
@@ -426,6 +432,9 @@ class Projector:
                     _LOGGER.debug("_update_property: Resolving _power_on_off_future")
                     self._power_on_off_future.set_result(value)
                 self._power_on_off_future = None
+                if self._has_errors:
+                    self._has_errors = False
+                    self._update_property(PROPERTY_ERR, None)
         if self._callback:
             asyncio.create_task(self._create_callback_task(self._callback, prop, value))
 

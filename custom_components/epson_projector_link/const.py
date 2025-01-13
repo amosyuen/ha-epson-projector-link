@@ -34,6 +34,8 @@ PROPERTY_TO_ATTRIBUTE_NAME_MAP = {
     PROPERTY_VOLUME: "volume",
 }
 
+STATE_ERROR = "error"
+
 SERVICE_LOAD_LENS_MEMORY = "load_lens_memory"
 SERVICE_LOAD_PICTURE_MEMORY = "load_picture_memory"
 SERVICE_SELECT_AUTO_IRIS_MODE = "select_auto_iris_mode"

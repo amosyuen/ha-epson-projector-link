@@ -4,6 +4,7 @@
       "projector": {
         "state": {
           "cooldown": "Cooldown",
+          "error": "Error",
           "on": "On",
           "off": "Off",
           "warmup": "Warmup"
