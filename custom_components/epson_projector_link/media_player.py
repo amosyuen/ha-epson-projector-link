@@ -249,7 +249,6 @@ class EpsonProjectorMediaPlayer(MediaPlayerEntity, RestoreEntity):
             unregister_callbacks.append(
                 async_track_time_interval(
                     hass,
-                    # self.async_get_power,
                     get_power_update,
                     scan_interval_power,
                 )
@@ -263,7 +262,6 @@ class EpsonProjectorMediaPlayer(MediaPlayerEntity, RestoreEntity):
             unregister_callbacks.append(
                 async_track_time_interval(
                     hass,
-                    # self.update_additional_attributes,
                     update_attributes,
                     scan_interval_properties,
                 )
@@ -296,8 +294,7 @@ class EpsonProjectorMediaPlayer(MediaPlayerEntity, RestoreEntity):
         _LOGGER.debug("async_update: unique_id=%s", self._config_entry.unique_id)
         await self.async_get_power()
 
-    # now param is to allow callback to work
-    async def async_get_power(self, now=None):
+    async def async_get_power(self):
         try:
             self._attr_state = await self._projector.get_property(PROPERTY_POWER)
             return self._attr_state
@@ -310,8 +307,7 @@ class EpsonProjectorMediaPlayer(MediaPlayerEntity, RestoreEntity):
             self._attr_available = False
             raise
 
-    # now param is to allow callback to work
-    def update_additional_attributes(self, now=None):
+    def update_additional_attributes(self):
         """Poll additional attributes"""
         if PROPERTY_SOURCE in self._poll_properties and self._attr_source_list is None:
             self.hass.create_task(self.async_try_get_property(PROPERTY_SOURCE_LIST))
