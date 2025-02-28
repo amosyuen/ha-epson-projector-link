@@ -189,6 +189,7 @@ SOURCE_CODE_MAP = {
     "52": "USB",
     "53": "LAN",
     "56": "WiFi Direct",
+    "80": "HDBaseT",
     "A0": "HDMI2",
     "D0": "WirelessHD",
 }
