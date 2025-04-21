@@ -228,7 +228,10 @@ class Projector:
 
         # Wait if the projector is cooling down or warming up
         if self._power_state == STATE_COOLDOWN or self._power_state == STATE_WARMUP:
-            if not self._power_on_off_future.done():
+            if (
+                self._power_on_off_future is not None
+                and not self._power_on_off_future.done()
+            ):
                 try:
                     _LOGGER.debug(
                         '_send_request: command="%s" waiting for power state change future',
