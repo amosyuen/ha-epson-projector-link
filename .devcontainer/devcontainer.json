@@ -2,6 +2,7 @@
 {
   "name": "Epson projector link integration development",
   "image": "python:3.14.0-trixie",
+  // When upgrading, also upgrade .github/workflows/tests.yaml python version
   "postStartCommand": "git config --global --add safe.directory ${containerWorkspaceFolder}",
   "postAttachCommand": ".devcontainer/setup.sh",
   "forwardPorts": [8123],
