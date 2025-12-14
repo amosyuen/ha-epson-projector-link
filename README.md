@@ -107,6 +107,18 @@ Only power state, warnings, and alerts are pushed. All other properties are poll
 
 - Epson Home Cinema 5050UB
 
+## Custom Actions
+
+You can send custom actions using the `epson_projector_link.send_command` action. Example action:
+
+```
+action: epson_projector_link.send_command
+data:
+  command: PWR ON
+target:
+  entity_id: media_player.theater_projector
+```
+
 ## Contributions are welcome!
 
 If you want to contribute to this please read the [Contribution guidelines](https://github.com/amosyuen/ha-epson-projector-link/blob/master/CONTRIBUTING.md)
