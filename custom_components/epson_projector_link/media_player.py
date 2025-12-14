@@ -311,7 +311,9 @@ class EpsonProjectorMediaPlayer(MediaPlayerEntity, RestoreEntity):
 
         if self._attr_state == STATE_ON:
             for prop in self._poll_properties:
-                self.hass.create_task(self.async_try_get_property(prop))
+                # Avoid double pulling the source list
+                if prop != PROPERTY_SOURCE:
+                    self.hass.create_task(self.async_try_get_property(prop))
 
     async def async_try_get_property(self, prop):
         try:
