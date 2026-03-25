@@ -85,7 +85,7 @@ async def async_setup_entry(
         scan_interval_power=scan_interval_power,
         scan_interval_properties=scan_interval_properties,
     )
-    async_add_entities([projector_entity], True)
+    async_add_entities([projector_entity], False)
 
     _setup_services()
 
