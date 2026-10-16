@@ -333,7 +333,16 @@ class Projector:
         # Explicit close will set _is_open to False.
         if self._is_open:
             self._is_open = False
-            self._create_task(self.connect())
+            self._create_task(self._reconnect())
+
+    async def _reconnect(self):
+        # Runs as a background task, so handle errors here. The projector is
+        # often unreachable (e.g. no mains power) and the next request will
+        # try to connect again.
+        try:
+            await self.connect()
+        except Exception as err:
+            _LOGGER.debug("_reconnect: Failed to re-open connection error=%s", err)
 
     def _handle_ack(self):
         request = self._pop_request()
