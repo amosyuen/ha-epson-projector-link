@@ -289,7 +289,10 @@ class EpsonProjectorMediaPlayer(MediaPlayerEntity, RestoreEntity):
         try:
             self._attr_state = await self._projector.get_property(PROPERTY_POWER)
             return self._attr_state
-        except asyncio.TimeoutError:
+        except (asyncio.TimeoutError, OSError) as err:
+            # The projector is unreachable, e.g. it has no mains power. Do not
+            # raise, otherwise Home Assistant does not add the entity on setup.
+            _LOGGER.debug("async_get_power: Projector unreachable error=%s", err)
             self._cancel_power_retry()
             self._unsub_power_retry = async_call_later(
                 self.hass, POWER_TIMEOUT_RETRY_INTERVAL, self._async_power_retry
