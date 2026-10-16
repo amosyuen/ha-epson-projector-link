@@ -64,5 +64,8 @@ async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry):
         )
     )
     if unloaded:
-        hass.data[DOMAIN].pop(config_entry.entry_id)
+        projector = hass.data[DOMAIN].pop(config_entry.entry_id)
+        # Close the connection, otherwise its listen task keeps running after a
+        # reload and passes every projector event to the removed entity.
+        projector.close()
     return unloaded
