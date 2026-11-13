@@ -111,6 +111,7 @@ class Projector:
         self._power_on_off_future = None
         self._request_queue = deque()
         self._tasks = set()
+        self._connect_lock = asyncio.Lock()
 
         self._reader = None
         self._writer = None
@@ -163,7 +164,7 @@ class Projector:
         self._is_open = True
         self._reader = reader
         self._writer = writer
-        self._create_task(self._listen())
+        self._create_task(self._listen(reader))
         _LOGGER.info("connect: Connection opened")
         return
 
@@ -201,8 +202,7 @@ class Projector:
         """Send TCP request."""
         _LOGGER.debug('_send_request: command="%s"', request.command)
 
-        if self._is_open is False:
-            await self.connect()
+        await self._ensure_connected()
 
         for r in self._request_queue:
             if r.command == request.command:
@@ -278,12 +278,12 @@ class Projector:
             if request in self._request_queue:
                 self._request_queue.remove(request)
 
-    async def _listen(self):
+    async def _listen(self, reader):
         _LOGGER.debug("_listen: Listening to connection")
 
-        while self._is_open:
+        while self._is_open and self._reader is reader:
             try:
-                response_bytes = await self._reader.readuntil(b":")
+                response_bytes = await reader.readuntil(b":")
             except Exception:
                 break
             if len(response_bytes) == 0:
@@ -330,10 +330,28 @@ class Projector:
         _LOGGER.info("_listen: Connection ended")
 
         # Try to-reopen connection, if it was not an explicit close.
-        # Explicit close will set _is_open to False.
-        if self._is_open:
+        # Explicit close will set _is_open to False. Only the listener of the
+        # current connection re-opens it, so that two listeners do not keep
+        # replacing each other's connection.
+        if self._is_open and self._reader is reader:
             self._is_open = False
-            self._create_task(self.connect())
+            self._create_task(self._reconnect())
+
+    async def _ensure_connected(self):
+        # Requests can arrive while there is no connection. Open only one, the
+        # projector accepts a single connection at a time.
+        async with self._connect_lock:
+            if not self._is_open:
+                await self.connect()
+
+    async def _reconnect(self):
+        # Runs as a background task, so handle errors here. The projector is
+        # often unreachable (e.g. no mains power) and the next request will
+        # try to connect again.
+        try:
+            await self._ensure_connected()
+        except Exception as err:
+            _LOGGER.debug("_reconnect: Failed to re-open connection error=%s", err)
 
     def _handle_ack(self):
         request = self._pop_request()
