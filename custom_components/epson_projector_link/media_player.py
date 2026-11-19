@@ -4,7 +4,6 @@ import asyncio
 from datetime import timedelta
 import logging
 
-from homeassistant.components.media_player import DOMAIN as MEDIA_PLAYER_PLATFORM
 from homeassistant.components.media_player import MediaPlayerDeviceClass
 from homeassistant.components.media_player import MediaPlayerEntity
 from homeassistant.components.media_player.const import ATTR_INPUT_SOURCE_LIST
@@ -13,9 +12,9 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_SCAN_INTERVAL
 from homeassistant.const import STATE_ON
 from homeassistant.core import HomeAssistant
+from homeassistant.core import callback
 from homeassistant.helpers import entity_platform
 import homeassistant.helpers.config_validation as cv
-from homeassistant.helpers.entity_registry import async_get as async_get_entity_registry
 from homeassistant.helpers.event import async_call_later
 from homeassistant.helpers.event import async_track_time_interval
 from homeassistant.helpers.restore_state import RestoreEntity
@@ -163,19 +162,6 @@ def _to_time_delta_seconds(scan_interval):
     )
 
 
-async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry):
-    """Unload Epson Projector Home Cinema entry."""
-    _LOGGER.debug("async_unload_entry: entry_id=%s", config_entry.entry_id)
-    registry = async_get_entity_registry(hass)
-    entity_id = registry.async_get_entity_id(
-        MEDIA_PLAYER_PLATFORM, DOMAIN, config_entry.entry_id
-    )
-    projector_entity = registry.async_get(entity_id)
-    projector_entity.unload()
-
-    return True
-
-
 PROPERTY_TO_FEATURE_MAP = {
     PROPERTY_SOURCE: MediaPlayerEntityFeature.SELECT_SOURCE,
     PROPERTY_VOLUME: MediaPlayerEntityFeature.VOLUME_SET,
@@ -237,31 +223,38 @@ class EpsonProjectorMediaPlayer(MediaPlayerEntity, RestoreEntity):
         self._attr_supported_features = _get_supported_features(poll_properties)
         self._attr_translation_key = "projector"
 
+        self._scan_interval_power = scan_interval_power
+        self._scan_interval_properties = scan_interval_properties
+        self._unsub_power_retry = None
+
         projector.set_callback(self._callback)
-
-        unregister_callbacks = []
-        if scan_interval_power is not None:
-            unregister_callbacks.append(
-                async_track_time_interval(
-                    hass,
-                    self._async_get_power_callback,
-                    scan_interval_power,
-                )
-            )
-
-        if scan_interval_properties is not None and len(poll_properties) > 0:
-            unregister_callbacks.append(
-                async_track_time_interval(
-                    hass,
-                    self._update_additional_attributes_callback,
-                    scan_interval_properties,
-                )
-            )
-        self._unregister_callbacks = unregister_callbacks
 
     async def async_added_to_hass(self):
         """Run when entity about to be added."""
         await super().async_added_to_hass()
+
+        # Start polling only once the entity is added, and let Home Assistant
+        # cancel the timers when the entity is removed (e.g. on reload).
+        if self._scan_interval_power is not None:
+            self.async_on_remove(
+                async_track_time_interval(
+                    self.hass,
+                    self._async_get_power_callback,
+                    self._scan_interval_power,
+                )
+            )
+
+        if (
+            self._scan_interval_properties is not None
+            and len(self._poll_properties) > 0
+        ):
+            self.async_on_remove(
+                async_track_time_interval(
+                    self.hass,
+                    self._update_additional_attributes_callback,
+                    self._scan_interval_properties,
+                )
+            )
 
         # Restore old state
         old_state = await self.async_get_last_state()
@@ -274,11 +267,10 @@ class EpsonProjectorMediaPlayer(MediaPlayerEntity, RestoreEntity):
                     self._attr_extra_state_attributes[attribute] = value
             self.async_write_ha_state()
 
-    def unload(self):
-        """Unload projector entity."""
-        for callback in self._unregister_callbacks:
-            callback()
-        self._unregister_callbacks.clear()
+    async def async_will_remove_from_hass(self):
+        """Cancel a pending power retry when the entity is removed."""
+        self._cancel_power_retry()
+        await super().async_will_remove_from_hass()
 
     async def async_update(self):
         """Update state."""
@@ -286,34 +278,55 @@ class EpsonProjectorMediaPlayer(MediaPlayerEntity, RestoreEntity):
         await self.async_get_power()
 
     async def _async_get_power_callback(self, now=None):
-        return await self.async_get_power()
+        try:
+            await self.async_get_power()
+        except Exception:
+            # Already logged in async_get_power. The projector is often
+            # unreachable (e.g. no mains power), so do not raise from the timer.
+            pass
 
     async def async_get_power(self):
         try:
             self._attr_state = await self._projector.get_property(PROPERTY_POWER)
             return self._attr_state
-        except asyncio.TimeoutError:
-            async_call_later(
-                self.hass, POWER_TIMEOUT_RETRY_INTERVAL, self._async_get_power_callback
+        except (asyncio.TimeoutError, OSError) as err:
+            # The projector is unreachable, e.g. it has no mains power. Do not
+            # raise, otherwise Home Assistant does not add the entity on setup.
+            _LOGGER.debug("async_get_power: Projector unreachable error=%s", err)
+            self._cancel_power_retry()
+            self._unsub_power_retry = async_call_later(
+                self.hass, POWER_TIMEOUT_RETRY_INTERVAL, self._async_power_retry
             )
         except Exception as err:
             _LOGGER.debug("async_get_power: Error getting power error=%s", err)
             self._attr_available = False
             raise
 
+    async def _async_power_retry(self, now):
+        self._unsub_power_retry = None
+        await self._async_get_power_callback()
+
+    def _cancel_power_retry(self):
+        if self._unsub_power_retry is not None:
+            self._unsub_power_retry()
+            self._unsub_power_retry = None
+
+    @callback
     def _update_additional_attributes_callback(self, now):
-        return self.update_additional_attributes()
+        self.update_additional_attributes()
 
     def update_additional_attributes(self):
         """Poll additional attributes"""
         if PROPERTY_SOURCE in self._poll_properties and self._attr_source_list is None:
-            self.hass.create_task(self.async_try_get_property(PROPERTY_SOURCE_LIST))
+            self.hass.async_create_task(
+                self.async_try_get_property(PROPERTY_SOURCE_LIST)
+            )
 
         if self._attr_state == STATE_ON:
             for prop in self._poll_properties:
                 # Avoid double pulling the source list
                 if prop != PROPERTY_SOURCE:
-                    self.hass.create_task(self.async_try_get_property(prop))
+                    self.hass.async_create_task(self.async_try_get_property(prop))
 
     async def async_try_get_property(self, prop):
         try:
