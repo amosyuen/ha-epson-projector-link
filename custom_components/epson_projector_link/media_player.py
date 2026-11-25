@@ -274,8 +274,9 @@ class EpsonProjectorMediaPlayer(MediaPlayerEntity, RestoreEntity):
                     self._attr_extra_state_attributes[attribute] = value
             self.async_write_ha_state()
 
-    def unload(self):
-        """Unload projector entity."""
+    async def async_will_remove_from_hass(self):
+        """Cancel polling timers when the entity is removed."""
+        await super().async_will_remove_from_hass()
         for callback in self._unregister_callbacks:
             callback()
         self._unregister_callbacks.clear()
